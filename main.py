@@ -146,23 +146,46 @@ class SeatAutoBooker:
             return -1
         return 0
 
-    def get_user_info(self):
-        logging.info('Getting user info')
+    # def get_user_info(self):
+    #     logging.info('Getting user info')
 
-        headers = self.cfg["headers"]
-        headers['Cookie'] = self.cookie
-        try:
-            resp = requests.get("https://hdu.huitu.zhishulib.com/Seat/Index/searchSeats?LAB_JSON=1",
-                                headers=headers)
-            self.user_data = resp.json()['DATA']
-            _ = self.user_data['uid']
-        except Exception as e:
-            logging.exception(e)
-            print(self.user_data)
-            print(e.__class__.__name__ + ",获取用户数据失败")
-            return -1
-        print("获取用户数据成功")
-        return 0
+    #     headers = self.cfg["headers"]
+    #     headers['Cookie'] = self.cookie
+    #     try:
+    #         resp = requests.get("https://hdu.huitu.zhishulib.com/Seat/Index/searchSeats?LAB_JSON=1",
+    #                             headers=headers)
+    #         self.user_data = resp.json()['DATA']
+    #         _ = self.user_data['uid']
+    #     except Exception as e:
+    #         logging.exception(e)
+    #         print(self.user_data)
+    #         print(e.__class__.__name__ + ",获取用户数据失败")
+    #         return -1
+    #     print("获取用户数据成功")
+    #     return 0
+    def get_user_info(self):
+      logging.info('Getting user info')
+  
+      try:
+          # 用 Selenium 直接访问目标页面
+          self.driver.get("https://hdu.huitu.zhishulib.com/Seat/Index/searchSeats?LAB_JSON=1")
+  
+          # 等待页面加载（如果有需要）
+          time.sleep(3)  # 可根据实际情况调整
+  
+          # 获取 JSON 数据（从 <pre> 或 <body> 中拿到的）
+          page_source = self.driver.find_element(By.TAG_NAME, "pre").text
+          self.user_data = json.loads(page_source)["DATA"]
+  
+          _ = self.user_data['uid']
+      except Exception as e:
+          logging.exception(e)
+          print(self.user_data if hasattr(self, 'user_data') else "无用户数据")
+          print(e.__class__.__name__ + ", 获取用户数据失败")
+          return -1
+      print("获取用户数据成功")
+      return 0
+
 
     def wechatNotice(self, message, desp=None):
         logging.info('Sending WeChat notice')
